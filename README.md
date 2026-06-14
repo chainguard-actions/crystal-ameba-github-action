@@ -1,16 +1,82 @@
-# crystal-ameba/github-action
+# Crystal Ameba GitHub Action
 
-A GitHub Action that lints Crystal shards with Ameba
+GitHub Action that lints Crystal shards with [Ameba](https://github.com/crystal-ameba/ameba) linter
 
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/crystal-ameba/github-action](https://github.com/crystal-ameba/github-action).
+![](https://github.com/crystal-ameba/github-action/raw/master/assets/sample.png)
 
-## Versions
+## Usage
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v0.10.0 | [`v0.10.0`](https://github.com/chainguard-actions/crystal-ameba-github-action/tree/v0.10.0) | [`1cb34e9`](https://github.com/crystal-ameba/github-action/commit/1cb34e9b5883dbcc30e726d6c1bc6eb7aaebeae3) |
-| v0.8.0 | [`v0.8.0`](https://github.com/chainguard-actions/crystal-ameba-github-action/tree/v0.8.0) | [`22ab170`](https://github.com/crystal-ameba/github-action/commit/22ab170d293f0c8416b7a100eda9b01c7ba534c5) |
-| v0.9.0 | [`v0.9.0`](https://github.com/chainguard-actions/crystal-ameba-github-action/tree/v0.9.0) | [`8039cc4`](https://github.com/crystal-ameba/github-action/commit/8039cc4889f60fb72be76fdcd34a0bf281b8e1d9) |
+Add the following to your GitHub action workflow to use Crystal Ameba Linter:
+
+``` yaml
+- name: Crystal Ameba Linter
+  uses: crystal-ameba/github-action@v0.11.0
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Example Workflow
+
+``` yaml
+name: Crystal CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Crystal
+        uses: crystal-lang/install-crystal@v1
+
+      - name: Download source
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: shards install
+
+      - name: Run tests
+        run: crystal spec
+
+      - name: Run Ameba Linter
+        uses: crystal-ameba/github-action@v0.10.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+## Compatibility Versions
+
+| Ameba version | GitHub Action version |
+|---------------|-----------------------|
+| ~> v1.6.3     | v0.11.0               |
+| ~> v1.6.2     | v0.10.0               |
+| ~> v1.6.1     | v0.9.0                |
+| ~> v1.5.0     | v0.8.0                |
+| ~> v1.4.0     | v0.7.1                |
+| v1.3.1        | v0.6.0                |
+| v1.2.0        | v0.5.1                |
+| v1.1.0        | v0.4.0                |
+| v1.0.1        | v0.3.1                |
+| v1.0.0        | v0.3.0                |
+| v0.14.3       | v0.2.12               |
+
+### Bump versions
+
+* Crystal version should be updated in `Dockerfile` file (version of the image).
+* Ameba version should be updated in `shard.yml`/`shard.lock` files.
+
+## Contributing
+
+1. Fork it (<https://github.com/crystal-ameba/github-action/fork>)
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
+
+## Contributors
+
+- [Vitalii Elenhaupt](https://github.com/veelenga) - creator and maintainer
+- [Sijawusz Pur Rahnama](https://github.com/Sija) - contributor and maintainer
 
 ## Privacy
 
