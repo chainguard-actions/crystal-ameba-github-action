@@ -1,0 +1,1 @@
+# crystal-ameba-github-action
