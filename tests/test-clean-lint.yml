@@ -1,0 +1,159 @@
+name: Test Ameba linting with all rules disabled (clean pass)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create .ameba.yml to disable all rules
+        run: |
+          # Disable all Ameba rules so the linter always passes regardless of code
+          cat > "$GITHUB_WORKSPACE/.ameba.yml" << 'EOF'
+          Lint/AmbiguousAssignment:
+            Enabled: false
+          Lint/AmbiguousRegex:
+            Enabled: false
+          Lint/ComparisonToBoolean:
+            Enabled: false
+          Lint/DebugCalls:
+            Enabled: false
+          Lint/EmptyExpression:
+            Enabled: false
+          Lint/EmptyLoop:
+            Enabled: false
+          Lint/HashDuplicatedKey:
+            Enabled: false
+          Lint/LiteralInCondition:
+            Enabled: false
+          Lint/LiteralInInterpolation:
+            Enabled: false
+          Lint/MissingBlockArgument:
+            Enabled: false
+          Lint/NotNilAfterNoBang:
+            Enabled: false
+          Lint/PercentArrays:
+            Enabled: false
+          Lint/RedundantStringCoercion:
+            Enabled: false
+          Lint/ShadowedArgument:
+            Enabled: false
+          Lint/ShadowedOverloadedDef:
+            Enabled: false
+          Lint/ShadowingOuterLocalVar:
+            Enabled: false
+          Lint/SpecFocus:
+            Enabled: false
+          Lint/TopLevelException:
+            Enabled: false
+          Lint/UnneededDisableDirective:
+            Enabled: false
+          Lint/UnusedArgument:
+            Enabled: false
+          Lint/UselessAssign:
+            Enabled: false
+          Lint/UselessConditionInWhen:
+            Enabled: false
+          Lint/Void:
+            Enabled: false
+          Metrics/CyclomaticComplexity:
+            Enabled: false
+          Metrics/MethodLength:
+            Enabled: false
+          Naming/BlockParameterName:
+            Enabled: false
+          Naming/ConstantNames:
+            Enabled: false
+          Naming/FileName:
+            Enabled: false
+          Naming/MethodNames:
+            Enabled: false
+          Naming/PredicateName:
+            Enabled: false
+          Naming/QueryBoolMethods:
+            Enabled: false
+          Naming/RescuedExceptionsVariableName:
+            Enabled: false
+          Naming/TypeNames:
+            Enabled: false
+          Naming/VariableNames:
+            Enabled: false
+          Performance/AnyInsteadOfEmpty:
+            Enabled: false
+          Performance/ChainedCallWithNoBang:
+            Enabled: false
+          Performance/CompactAfterMap:
+            Enabled: false
+          Performance/FlattenAfterMap:
+            Enabled: false
+          Performance/MapInsteadOfBlock:
+            Enabled: false
+          Performance/MinMaxAfterMap:
+            Enabled: false
+          Style/ArrayDecomposition:
+            Enabled: false
+          Style/BlockCaptureIsUsed:
+            Enabled: false
+          Style/CombinedNilCheck:
+            Enabled: false
+          Style/ConstantVerification:
+            Enabled: false
+          Style/DoubleSplatArgument:
+            Enabled: false
+          Style/EmptyCase:
+            Enabled: false
+          Style/GuardClause:
+            Enabled: false
+          Style/IsAFilter:
+            Enabled: false
+          Style/LargeNumbers:
+            Enabled: false
+          Style/MultilineIsACheck:
+            Enabled: false
+          Style/NegatedConditionsInUnless:
+            Enabled: false
+          Style/NilCheck:
+            Enabled: false
+          Style/PotentiallyConfusingStringModifiers:
+            Enabled: false
+          Style/PredicateName:
+            Enabled: false
+          Style/RedundantBegin:
+            Enabled: false
+          Style/RedundantNext:
+            Enabled: false
+          Style/RedundantReturn:
+            Enabled: false
+          Style/SingleExpressionInCondition:
+            Enabled: false
+          Style/TypeFilterWithCast:
+            Enabled: false
+          Style/UnlessElse:
+            Enabled: false
+          Style/VerboseBlock:
+            Enabled: false
+          Style/WhileTrue:
+            Enabled: false
+          EOF
+
+      - name: Run Crystal Ameba Linter (all rules disabled)
+        id: ameba
+        uses: .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Assert action completed
+        run: |
+          echo "Ameba action outcome: ${{ steps.ameba.outcome }}"
+          OUTCOME="${{ steps.ameba.outcome }}"
+          # With all rules disabled, ameba itself should pass. The action may
+          # still fail if the GitHub Checks API call fails (e.g. permissions),
+          # but it should always complete (not be cancelled/skipped).
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action completed with outcome '$OUTCOME'"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

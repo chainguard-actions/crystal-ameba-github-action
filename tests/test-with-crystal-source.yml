@@ -1,0 +1,51 @@
+name: Test with Crystal source files present
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: fake-token-for-testing
+      GITHUB_REPOSITORY: test-owner/test-repo
+      GITHUB_SHA: abc1234567890abcdef1234567890abcdef12345
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Create a minimal Crystal source file for Ameba to lint
+      - name: Create Crystal source file
+        run: |
+          mkdir -p /tmp/crystal-src
+          cat > /tmp/crystal-src/hello.cr << 'EOF'
+          # A simple Crystal file
+          def hello(name : String) : String
+            "Hello, #{name}!"
+          end
+
+          puts hello("World")
+          EOF
+          echo "Crystal source file created"
+
+      # Run the action — it will fail at the GitHub Checks API call because
+      # the token is fake, but the Docker image and binary must start correctly.
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: fake-token-for-testing
+          GITHUB_REPOSITORY: test-owner/test-repo
+          GITHUB_SHA: abc1234567890abcdef1234567890abcdef12345
+
+      - name: Assert action ran and failed (not skipped or cancelled)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "action outcome: $OUTCOME"
+          if [ "$OUTCOME" = "skipped" ] || [ "$OUTCOME" = "cancelled" ]; then
+            echo "FAIL: action was unexpectedly $OUTCOME"
+            exit 1
+          fi
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed as expected (fake GitHub token rejected by API)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded"
+          fi

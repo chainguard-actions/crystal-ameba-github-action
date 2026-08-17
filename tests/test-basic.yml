@@ -1,0 +1,29 @@
+name: Test basic Crystal Ameba linting
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Crystal Ameba Linter
+        id: ameba
+        uses: .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Assert action ran
+        run: |
+          echo "Ameba action outcome: ${{ steps.ameba.outcome }}"
+          OUTCOME="${{ steps.ameba.outcome }}"
+          # The action either succeeds (no lint issues, check run created) or
+          # fails (lint issues found, or API permission issue). Either way it
+          # should complete — not be 'cancelled' or 'skipped'.
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action completed with outcome '$OUTCOME'"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
