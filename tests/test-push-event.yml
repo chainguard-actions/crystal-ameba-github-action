@@ -1,0 +1,32 @@
+name: Test Crystal Ameba Linter - Push Event Context
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Crystal Ameba Linter action on push event (expect failure due to fake token)
+        id: ameba
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: fake-token-for-push-test
+          GITHUB_REPOSITORY: test-owner/test-repo
+          GITHUB_SHA: deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+
+      - name: Assert action ran (outcome is failure or success, not skipped/cancelled)
+        env:
+          OUTCOME: ${{ steps.ameba.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ] || [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action ran and produced a definitive outcome: $OUTCOME"
+          else
+            echo "FAIL: action did not run properly, outcome was '$OUTCOME'"
+            exit 1
+          fi
