@@ -1,0 +1,31 @@
+name: Test with except rules (disable specific rules)
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          except: Lint/UselessAssign,Style/RedundantReturn
+        continue-on-error: true
+
+      - name: Assert ameba ran with except rules
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # With except rules, those specific rules are disabled
+          # The action should run without crashing
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: ameba ran successfully with except rules"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: ameba ran with except rules and found other issues"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

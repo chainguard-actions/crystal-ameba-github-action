@@ -1,0 +1,12 @@
+---
+# Ameba configuration - disable all rules for testing
+AllRules:
+  Enabled: false
+Lint/UselessAssign:
+  Enabled: false
+Lint/UnusedArgument:
+  Enabled: false
+Naming/VariableNames:
+  Enabled: false
+Style/RedundantReturn:
+  Enabled: false
